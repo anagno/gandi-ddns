@@ -3,6 +3,7 @@
 This is a simple container for updating a single zone recond using the Gandi`s LiveDNS.
 
 Live dns is available on www.gandi.net
+
 Obtaining your API Key: http://doc.livedns.gandi.net/#step-1-get-your-api-key
 
 
@@ -18,8 +19,25 @@ docker create \
   -e DOMAIN=example.com \
   -e SUBDOMAIN=subdomain \
   -e APIKEY=YOURAPIKEY
-  linuxserver/ddclient
+  anagno/gandi-ddns
 ```
+
+### docker-compose
+
+Compatible with docker-compose v3 schemas.
+
+```
+---
+version: '3.4'
+services:
+  ddns:
+    image: anagno/gandi-ddns:0.2
+    environment:
+      DOMAIN: "example.com"
+      SUBDOMAIN: "subdomain"
+      APIKEY: "YOURAPIKEY"
+```
+
 
 ## Parameters
 

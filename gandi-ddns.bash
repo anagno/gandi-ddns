@@ -46,16 +46,12 @@ if [[ ! -z "$IP4" ]]; then
     if [ "$IP4" != "$DNS_IP4" ]; then
         DATA='{"rrset_values": ["'$IP4'"]}'
         
-        status= $(curl -s4 -o /dev/null -XPUT -d "$DATA" \
+        curl -s4 -o /dev/null -XPUT -d "$DATA" \
             -H"X-Api-Key: $APIKEY" \
             -H"Content-Type: application/json" \
-            "$API/domains/$DOMAIN/records/$SUBDOMAIN/A" )
+            "$API/domains/$DOMAIN/records/$SUBDOMAIN/A"
 
-        if [ "${status}" = '201' ] ; then
-            echo "$(date "+[%Y-%m-%d %H:%M:%S]") [INFO] Updated $SUBDOMAIN.$DOMAIN to $IP4"
-        else
-            echo "$(date "+[%Y-%m-%d %H:%M:%S]") [ERROR] API POST returned status ${status}"
-        fi
+        echo "$(date "+[%Y-%m-%d %H:%M:%S]") [INFO] Updated $SUBDOMAIN.$DOMAIN to $IP4 (previous value $DNS_IP4)."
 
     else
         echo "$(date "+[%Y-%m-%d %H:%M:%S]") [INFO] Current DNS A record for $SUBDOMAIN.$DOMAIN matches WAN IP ($IP4)."
