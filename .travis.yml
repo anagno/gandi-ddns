@@ -9,7 +9,7 @@ env:
   matrix:
     - TARGET_ARCH=amd64 QEMU_ARCH=x86_64
     - TARGET_ARCH=i386 QEMU_ARCH=i386
-    - TARGET_ARCH=arm32v7 QEMU_ARCH=arm
+    - TARGET_ARCH=arm32v6 QEMU_ARCH=arm
     - TARGET_ARCH=arm64v8 QEMU_ARCH=aarch64
 
 addons:
@@ -62,13 +62,6 @@ script:
         --tag ${NAME}:${VERSION}-${TARGET_ARCH} .
 
 before_deploy:
-  - docker run --name test_image 
-    -e DOMAIN=example.com \
-    -e SUBDOMAIN=subdomain \
-    -e APIKEY=YOURAPIKEY \
-    ${NAME}:${VERSION}-${TARGET_ARCH} sleep 10
-  - sleep 5
-  - sudo docker ps | grep -q test_image
   # To have `DOCKER_USER` and `DOCKER_PASS`
   # use `travis env set`.
   - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
