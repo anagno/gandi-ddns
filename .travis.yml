@@ -62,11 +62,11 @@ script:
         --tag ${NAME}:${VERSION}-${TARGET_ARCH} .
 
 before_deploy:
-    - docker run --name test_image 
-      -e DOMAIN=example.com \
-      -e SUBDOMAIN=subdomain \
-      -e APIKEY=YOURAPIKEY \
-      ${NAME}:${VERSION}-${TARGET_ARCH} sleep 10
+  - docker run --name test_image 
+    -e DOMAIN=example.com \
+    -e SUBDOMAIN=subdomain \
+    -e APIKEY=YOURAPIKEY \
+    ${NAME}:${VERSION}-${TARGET_ARCH} sleep 10
   - sleep 5
   - sudo docker ps | grep -q test_image
   # To have `DOCKER_USER` and `DOCKER_PASS`
@@ -77,7 +77,7 @@ before_deploy:
 deploy:
   provider: script
   on:
-    repo: osixia/docker-light-baseimage
+    repo: anagno/gandi-ddns
     all_branches: true
   script: docker push ${NAME}:${VERSION}-${TARGET_ARCH}
 
