@@ -55,13 +55,17 @@ before_script:
   - if [ -n "$TRAVIS_TAG" ]; then
       VERSION=$(echo "${TRAVIS_TAG}" | sed -e 's/\(.*\)[-v]\(.*\)/\1\2/g');
     fi
+  - if [ "${TRAVIS_BRANCH}" == 'master' ]; then
+    VERSION="stable";
+    fi
 
 script:
-  - docker build 
-        --file Dockerfile 
-        --tag ${NAME}:${VERSION}-${TARGET_ARCH} .
+  - docker build -t ${NAME}:${VERSION}-${TARGET_ARCH} --no-cache --rm .
 
 before_deploy:
+  - docker run -d --name test_image ${NAME}:${VERSION}-${TARGET_ARCH} sleep 10
+  - sleep 5
+  - sudo docker ps | grep -q test_image
   # To have `DOCKER_USER` and `DOCKER_PASS`
   # use `travis env set`.
   - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
@@ -70,7 +74,6 @@ before_deploy:
 deploy:
   provider: script
   on:
-    repo: anagno/gandi-ddns
     all_branches: true
   script: docker push ${NAME}:${VERSION}-${TARGET_ARCH}
 
@@ -81,38 +84,23 @@ jobs:
       script: skip
       after_deploy:
         - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
-        - docker manifest create ${NAME}:${VERSION} 
-            ${NAME}:${VERSION}-amd64 ${NAME}:${VERSION}-i386 
-            ${NAME}:${VERSION}-arm32v7 
-            ${NAME}:${VERSION}-arm64v8;
-          docker manifest annotate ${NAME}:${VERSION} 
-            ${NAME}:${VERSION}-amd64 --os linux --arch amd64;
-          docker manifest annotate ${NAME}:${VERSION} 
-            ${NAME}:${VERSION}-i386 --os linux --arch 386;
-          docker manifest annotate ${NAME}:${VERSION} 
-            ${NAME}:${VERSION}-arm32v7 --os linux --arch arm --variant v7;
-          docker manifest annotate ${NAME}:${VERSION} 
-            ${NAME}:${VERSION}-arm64v8 --os linux --arch arm64 --variant v8;
+        - docker manifest create ${NAME}:${VERSION} ${NAME}:${VERSION}-amd64 ${NAME}:${VERSION}-i386 ${NAME}:${VERSION}-arm32v6 ${NAME}:${VERSION}-arm64v8;
+          docker manifest annotate ${NAME}:${VERSION} ${NAME}:${VERSION}-amd64 --os linux --arch amd64;
+          docker manifest annotate ${NAME}:${VERSION} ${NAME}:${VERSION}-i386 --os linux --arch 386;
+          docker manifest annotate ${NAME}:${VERSION} ${NAME}:${VERSION}-arm32v6 --os linux --arch arm --variant v7;
+          docker manifest annotate ${NAME}:${VERSION} ${NAME}:${VERSION}-arm64v8 --os linux --arch arm64 --variant v8;
 
         # The latest tag is coming from the stable branch of the repo
-        - if [ "${TRAVIS_BRANCH}" == 'stable' ]; then
-            docker manifest create ${NAME}:latest 
-              ${NAME}:${VERSION}-amd64 
-              ${NAME}:${VERSION}-i386 
-              ${NAME}:${VERSION}-arm32v7 
-              ${NAME}:${VERSION}-arm64v8;
-            docker manifest annotate ${NAME}:latest 
-              ${NAME}:${VERSION}-amd64 --os linux --arch amd64;
-            docker manifest annotate ${NAME}:latest 
-              ${NAME}:${VERSION}-i386 --os linux --arch 386;
-            docker manifest annotate ${NAME}:latest 
-              ${NAME}:${VERSION}-arm32v7 --os linux --arch arm --variant v7;
-            docker manifest annotate ${NAME}:latest 
-              ${NAME}:${VERSION}-arm64v8 --os linux --arch arm64 --variant v8;
+        - if [ "${TRAVIS_BRANCH}" == 'master' ]; then
+          docker manifest create ${NAME}:latest ${NAME}:${VERSION}-amd64 ${NAME}:${VERSION}-i386 ${NAME}:${VERSION}-arm32v6 ${NAME}:${VERSION}-arm64v8;
+          docker manifest annotate ${NAME}:latest ${NAME}:${VERSION}-amd64 --os linux --arch amd64;
+          docker manifest annotate ${NAME}:latest ${NAME}:${VERSION}-i386 --os linux --arch 386;
+          docker manifest annotate ${NAME}:latest ${NAME}:${VERSION}-arm32v6 --os linux --arch arm --variant v7;
+          docker manifest annotate ${NAME}:latest ${NAME}:${VERSION}-arm64v8 --os linux --arch arm64 --variant v8;
           fi
 
         - docker manifest push ${NAME}:${VERSION};
-          if [ "${TRAVIS_BRANCH}" == 'stable' ]; then
-            docker manifest push ${NAME}:latest;
+          if [ "${TRAVIS_BRANCH}" == 'master' ]; then
+          docker manifest push ${NAME}:latest;
           fi
 
