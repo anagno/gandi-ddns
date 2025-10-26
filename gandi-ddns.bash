@@ -68,16 +68,16 @@ if [[ ! -z "$IP4" ]]; then
 
     DNS_IP4=$(\
         curl -s4\
-            -H"X-Api-Key: $APIKEY" \
+            -H"authorization: Bearer $APIKEY" \
             -H"Content-Type: application/json" \
             "$API/domains/$DOMAIN/records/$SUBDOMAIN" |
-        jq -r '.[].rrset_values[0]')
+        jq -r '.[0].rrset_values[0]')
 
     if [ "$IP4" != "$DNS_IP4" ]; then
         DATA='{"rrset_values": ["'$IP4'"]}'
         
         curl -s4 -o /dev/null -XPUT -d "$DATA" \
-            -H"X-Api-Key: $APIKEY" \
+            -H"authorization: Bearer $APIKEY" \
             -H"Content-Type: application/json" \
             "$API/domains/$DOMAIN/records/$SUBDOMAIN/A"
 

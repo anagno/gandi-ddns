@@ -4,7 +4,7 @@ This is a simple container for updating a single zone recond using the Gandi`s L
 
 Live dns is available on www.gandi.net
 
-Obtaining your API Key: http://doc.livedns.gandi.net/#step-1-get-your-api-key
+Obtaining your API Key: https://docs.gandi.net/en/managing_an_organization/organizations/personal_access_token.html#contents
 
 
 ## Usage
